@@ -183,7 +183,7 @@ auto getchr(const std::string &prm = "", const std::string &valid = "", char def
 class Menu
 {
 private:
-    using f_type = void (*)(std::any &param);
+    using f_type = void (*)();
 
     struct MenItm
     {
@@ -207,9 +207,9 @@ public:
         stitle = t;
     }
 
-    void menu(std::any &param)
+    void menu()
     {
-        menu(*this, param);
+        menu(*this);
     }
 
     bool erase(size_t indx)
@@ -244,16 +244,11 @@ private:
     class RunVisitor
     {
     public:
-        RunVisitor(std::any &par) : param(par) {}
-
-        void operator()(f_type func) { func(param); }
-        void operator()(Menu *menu) { Menu::menu(*menu, param); }
-
-    private:
-        std::any &param;
+        void operator()(f_type func) { func(); }
+        void operator()(Menu *menu) { Menu::menu(*menu); }
     };
 
-    static void menu(const Menu &m, std::any &param)
+    static void menu(const Menu &m)
     {
         const static auto show = [](const Menu &mu)
         {
@@ -271,7 +266,7 @@ private:
         };
 
         for (size_t opt = 0U; (opt = show(m)) > 0;)
-            std::visit(RunVisitor(param), m.mitems[opt - 1].func);
+            std::visit(RunVisitor(), m.mitems[opt - 1].func);
     }
 
     std::string stitle;
@@ -281,7 +276,7 @@ private:
 using namespace std;
 using Params = vector<variant<size_t, int, double, char, string>>;
 
-void f1([[maybe_unused]] any &param)
+void f1()
 {
     auto num = getnum<size_t>("Wprowadz ile liczb ma byc w drzewie");
     std::unique_ptr<bst::Node<int>> node;
@@ -292,7 +287,7 @@ void f1([[maybe_unused]] any &param)
     bst::print(node);
 }
 
-void f2([[maybe_unused]] any &param)
+void f2()
 {
     auto num = getnum<size_t>("Wprowadz ile liczb ma byc w drzewie");
     auto numToFind = getnum<size_t>("Wprowadz liczbe ktora chcesz znalezc");
@@ -310,63 +305,9 @@ void f2([[maybe_unused]] any &param)
     std::cout << "Nie znaleziono wartosci: " << numToFind << " w drzewie\n";
 }
 
-void f6(any &param)
-{
-    auto &v = any_cast<Params &>(param);
-
-    v.push_back(getnum<double>("Enter a real between", 5.5, 50.5));
-}
-
-void f3([[maybe_unused]] any &param)
+void f3()
 {
     std::system(testPath.c_str());
-}
-
-void f7(any &param)
-{
-    auto &v = any_cast<Params &>(param);
-
-    v.push_back(getchr("Enter a vowel", "aeiou", 'a'));
-}
-void f4(any &param)
-{
-    auto &v = any_cast<Params &>(param);
-
-    v.push_back(getline("Enter text"));
-}
-
-void f51(any &param)
-{
-    const static auto proc = [](const auto &val)
-    { cout << val << endl; };
-
-    auto &v = any_cast<Params &>(param);
-
-    cout << "Entered data is\n";
-
-    for (const auto &d : v)
-        visit(proc, d);
-}
-
-void f5(any &param)
-{
-    auto &v = any_cast<Params &>(param);
-
-    cout << "Entered data is\n";
-
-    for (const auto &d : v)
-        if (auto pvi = get_if<int>(&d))
-            cout << *pvi << endl;
-        else if (auto pvd = get_if<double>(&d))
-            cout << *pvd << endl;
-        else if (auto pvc = get_if<char>(&d))
-            cout << *pvc << endl;
-        else if (auto pvs = get_if<string>(&d))
-            cout << *pvs << endl;
-        else if (auto pvu = get_if<size_t>(&d))
-            cout << *pvu << endl;
-        else
-            cout << "Unknown type" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -384,9 +325,8 @@ int main(int argc, char *argv[])
     Menu m2{"Uruchomienie scenariuszy testowych"s, {{"Uruchom testy"s, f3}}};
     Menu m1{"Manu glowne"s, {{"Trywialny przyklad", &m3}, {"Zaawansowany przyklad"s, &m4}, {"Uruchomienie scenariuszy testowych"s, &m2}}};
 
-    any param = Params{};
     std::stringstream ss;
     ss << argv[1] << " --list-tests && " << argv[1] << " -s";
     testPath = ss.str();
-    m1.menu(param);
+    m1.menu();
 }
