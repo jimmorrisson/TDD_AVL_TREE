@@ -5,90 +5,102 @@
 #include <iostream>
 namespace bst
 {
-template <typename T>
-struct Node
-{
-    Node(T data, std::unique_ptr<Node<T>> leftChild, std::unique_ptr<Node<T>> rightChild)
-    : data{data},
-    leftChild{std::move(leftChild)},
-    rightChild{std::move(rightChild)}
-    {}
-
-    T data;
-    std::unique_ptr<Node<T>> leftChild;
-    std::unique_ptr<Node<T>> rightChild;
-};
-
-template <typename T>
-[[nodiscard]] std::unique_ptr<Node<T>> insertNode(std::unique_ptr<Node<T>> node, T data)
-{
-    if (node == nullptr) {
-        return std::make_unique<Node<T>>(data, nullptr, nullptr);
-    }
-    Node<T>* current = node.get();
-    Node<T>* parent = nullptr;
-    while (true)
+    template <typename T>
+    struct Node
     {
-        parent = current;
-        if (data < parent->data)
+        Node(T data, std::unique_ptr<Node<T>> leftChild, std::unique_ptr<Node<T>> rightChild)
+            : data{data},
+              leftChild{std::move(leftChild)},
+              rightChild{std::move(rightChild)}
         {
-            current = current->leftChild.get();
-            if (current == nullptr) {
-                parent->leftChild = std::make_unique<Node<T>>(data, nullptr, nullptr);
-                return node;
+        }
+
+        T data;
+        std::unique_ptr<Node<T>> leftChild;
+        std::unique_ptr<Node<T>> rightChild;
+    };
+
+    template <typename T>
+    [[nodiscard]] std::unique_ptr<Node<T>> insertNode(std::unique_ptr<Node<T>> node, T data)
+    {
+        if (node == nullptr)
+        {
+            return std::make_unique<Node<T>>(data, nullptr, nullptr);
+        }
+        Node<T> *current = node.get();
+        Node<T> *parent = nullptr;
+        while (true)
+        {
+            parent = current;
+            if (data < parent->data)
+            {
+                current = current->leftChild.get();
+                if (current == nullptr)
+                {
+                    parent->leftChild = std::make_unique<Node<T>>(data, nullptr, nullptr);
+                    return node;
+                }
+            }
+            if (data > parent->data)
+            {
+                current = current->rightChild.get();
+                if (current == nullptr)
+                {
+                    parent->rightChild = std::make_unique<Node<T>>(data, nullptr, nullptr);
+                    return node;
+                }
+            }
+            if (data == parent->data)
+            {
+                break;
             }
         }
-        if (data > parent->data)
+        return node;
+    }
+
+    template <typename T>
+    [[nodiscard]] Node<T> *search(Node<T> *node, T data)
+    {
+        auto *current = node;
+
+        while (current != nullptr && current->data != data)
         {
-            current = current->rightChild.get();
-            if (current == nullptr) {
-                parent->rightChild = std::make_unique<Node<T>>(data, nullptr, nullptr);
-                return node;
+            if (current->data > data)
+            {
+                if (!current->leftChild)
+                {
+                    return nullptr;
+                }
+                current = current->leftChild.get();
+            }
+            if (current->data < data)
+            {
+                if (!current->rightChild)
+                {
+                    return nullptr;
+                }
+                current = current->rightChild.get();
             }
         }
-        if (data == parent->data) {
-            break;
-        }
+        return current;
     }
-    return node;
-}
 
-template <typename T>
-[[nodiscard]] Node<T>* search(Node<T> *node, T data)
-{
-    auto *current = node;
-
-    while(current != nullptr && current->data != data)
+    template <typename T>
+    void print(const std::unique_ptr<Node<T>> &node)
     {
-        if (current->data > data) {
-            current = current->leftChild.get();
-        }
-        if (current->data < data) {
-            current = current->rightChild.get();
-        }
-        if (current == nullptr) {
-            return nullptr;
-        }
+        print("", node, false);
     }
-    return current;
-}
 
-template <typename T>
-void print(const std::unique_ptr<Node<T>> &node)
-{
-    print("", node, false);
-}
-
-template <typename T>
-void print(const std::string& prefix, const std::unique_ptr<Node<T>> &node, bool isLeft)
-{
-    if (node) 
+    template <typename T>
+    void print(const std::string &prefix, const std::unique_ptr<Node<T>> &node, bool isLeft)
     {
-        std::cout << prefix;
-        std::cout << (isLeft ? "├──" : "└──" );
-        std::cout << node->data << std::endl;
-        print((isLeft ? "│   " : "    "), node->leftChild, true);
-        print((isLeft ? "│   " : "    "), node->rightChild, false);
+        if (node)
+        {
+            std::cout << prefix;
+            std::cout << (isLeft ? "├──" : "└──");
+            std::cout << node->data << std::endl;
+            print((isLeft ? "│   " : "    "), node->leftChild, true);
+            print((isLeft ? "│   " : "    "), node->rightChild, false);
+        }
     }
-}
 }

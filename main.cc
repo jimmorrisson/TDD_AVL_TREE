@@ -10,7 +10,12 @@
 #include <sstream>
 #include <limits>
 #include <cctype>
+#include <cstdlib>
 
+namespace
+{
+    std::string testPath = "";
+}
 
 inline std::string trim(const std::string &s)
 {
@@ -137,16 +142,16 @@ auto getnum(const std::string &prm = "", T nmin = std::numeric_limits<T>::lowest
 
 std::optional<char> getchr(std::istream &is, char def = 0, bool wholeline = true)
 {
-    if (wholeline) {
+    if (wholeline)
+    {
         if (auto o = getline(is); o.has_value())
         {
             return (o->empty() && def ? def : ((o->size() == 1) ? o->front() : std::optional<char>{}));
         }
-            return {};
+        return {};
     }
     return getdata<char>(is);
 }
-
 
 auto getchr(const std::string &prm = "", const std::string &valid = "", char def = 0, bool wholeline = true)
 {
@@ -285,10 +290,9 @@ void f1([[maybe_unused]] any &param)
         node = bst::insertNode<int>(std::move(node), std::rand() % 100);
     }
     bst::print(node);
-
 }
 
-void f2([[maybe_unused]]any &param)
+void f2([[maybe_unused]] any &param)
 {
     auto num = getnum<size_t>("Wprowadz ile liczb ma byc w drzewie");
     auto numToFind = getnum<size_t>("Wprowadz liczbe ktora chcesz znalezc");
@@ -298,7 +302,7 @@ void f2([[maybe_unused]]any &param)
         node = bst::insertNode<int>(std::move(node), std::rand() % 100);
     }
     bst::print(node);
-    if (bst::search(node.get(), static_cast<int>(numToFind)))
+    if (bst::search(node.get(), static_cast<int>(numToFind)) != nullptr)
     {
         std::cout << "Znaleziono wartosc: " << numToFind << " w drzewie\n";
         return;
@@ -313,11 +317,9 @@ void f6(any &param)
     v.push_back(getnum<double>("Enter a real between", 5.5, 50.5));
 }
 
-void f3(any &param)
+void f3([[maybe_unused]] any &param)
 {
-    auto &v = any_cast<Params &>(param);
-
-    v.push_back(getchr("Enter a char"));
+    std::system(testPath.c_str());
 }
 
 void f7(any &param)
@@ -367,13 +369,24 @@ void f5(any &param)
             cout << "Unknown type" << endl;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    Menu m3{"Zaawansowany przyklad"s, {{"Znajdz liczbe w drzewie"s, f2}}};
-    Menu m2{"Trywialny przyklad"s, {{"Podaj liczbe elementow do dodania do drzewa"s, f1}}};
-    Menu m1{"Manu glowne"s, {{"Trywialny przyklad", &m2}, {"Zaawansowany przyklad"s, &m3}}};
+    if (argc != 2)
+    {
+        std::cout << "Zla liczba argumentow. Nalezy podac jeden argument!\n";
+        return -1;
+    }
+    std::cout << argc << '\n'
+              << argv[1] << '\n';
+
+    Menu m4{"Zaawansowany przyklad"s, {{"Znajdz liczbe w drzewie"s, f2}}};
+    Menu m3{"Trywialny przyklad"s, {{"Podaj liczbe elementow do dodania do drzewa"s, f1}}};
+    Menu m2{"Uruchomienie scenariuszy testowych"s, {{"Uruchom testy"s, f3}}};
+    Menu m1{"Manu glowne"s, {{"Trywialny przyklad", &m3}, {"Zaawansowany przyklad"s, &m4}, {"Uruchomienie scenariuszy testowych"s, &m2}}};
 
     any param = Params{};
-
+    std::stringstream ss;
+    ss << argv[1] << " --list-tests && " << argv[1] << " -s";
+    testPath = ss.str();
     m1.menu(param);
 }
