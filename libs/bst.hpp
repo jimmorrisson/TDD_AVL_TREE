@@ -46,6 +46,9 @@ template <typename T>
                 return node;
             }
         }
+        if (data == parent->data) {
+            break;
+        }
     }
     return node;
 }
