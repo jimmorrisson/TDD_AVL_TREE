@@ -1,7 +1,8 @@
 #pragma once
 
 #include <memory>
-
+#include <string>
+#include <iostream>
 namespace bst
 {
 template <typename T>
@@ -54,7 +55,7 @@ template <typename T>
 {
     auto *current = node;
 
-    while(current->data != data)
+    while(current != nullptr && current->data != data)
     {
         if (current->data > data) {
             current = current->leftChild.get();
@@ -67,5 +68,24 @@ template <typename T>
         }
     }
     return current;
+}
+
+template <typename T>
+void print(const std::unique_ptr<Node<T>> &node)
+{
+    print("", node, false);
+}
+
+template <typename T>
+void print(const std::string& prefix, const std::unique_ptr<Node<T>> &node, bool isLeft)
+{
+    if (node) 
+    {
+        std::cout << prefix;
+        std::cout << (isLeft ? "├──" : "└──" );
+        std::cout << node->data << std::endl;
+        print((isLeft ? "│   " : "    "), node->leftChild, true);
+        print((isLeft ? "│   " : "    "), node->rightChild, false);
+    }
 }
 }
