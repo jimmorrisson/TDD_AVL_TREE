@@ -31,8 +31,5 @@ build/
 # Executables
 *.exe
 *.out
-<<<<<<< HEAD
 *.app
-=======
-*.app
->>>>>>> Initial commit
+*.DS_STORE

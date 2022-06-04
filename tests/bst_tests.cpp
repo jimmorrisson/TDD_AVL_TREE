@@ -40,6 +40,13 @@ TEST_CASE("Inserting to the bst lower values", "[bst, new node]")
             REQUIRE(currentNode->data == i);
         }
     }
+    SECTION("Inserting same value twice")
+    {
+        static constexpr auto value = 10;
+        auto node = std::make_unique<bst::Node<int>>(value, nullptr, nullptr);
+        node = bst::insertNode(std::move(node), value);
+        REQUIRE(node->data == value);
+    }
 }
 
 TEST_CASE("Inserting to the bst higher values", "[bst, new node]")
@@ -105,5 +112,17 @@ TEST_CASE("Search for data", "[bst, data]")
             auto *retNode = bst::search(node.get(), 7);
             REQUIRE(retNode->leftChild->data == 6);
         }
+    }
+    SECTION("Try to find value in the nullptr")
+    {
+        std::unique_ptr<bst::Node<int>> node;
+        REQUIRE_FALSE(bst::search(node.get(), 1));
+    }
+    SECTION("Try to find non-existing values in a tree")
+    {
+        static constexpr auto value = 2;
+        bst::Node<int> node{value, nullptr, nullptr};
+        REQUIRE_FALSE(bst::search(&node, 3));
+        REQUIRE_FALSE(bst::search(&node, 1));
     }
 }

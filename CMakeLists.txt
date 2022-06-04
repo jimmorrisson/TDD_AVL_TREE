@@ -3,6 +3,7 @@ project(avl_tree)
 
 set(CMAKE_CXX_STANDARD 20)
 
+include(CodeCoverage.cmake)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror -fsanitize=address)
 add_link_options(-fsanitize=address)
 add_executable(${CMAKE_PROJECT_NAME} main.cc)
